@@ -1,0 +1,82 @@
+Sub Arquivo_Clientes()
+    Dim Sht As Worksheet
+    Dim sht1 As Worksheet
+    
+    Dim Dia As String
+    Dim Mes As String
+    Dim Ano As String
+    
+    Dia = Format(Date, "dd")
+    'MsgBox (Dia)
+    Mes = Format(Date, "mm")
+    'MsgBox (Mes)
+    Ano = Format(Date, "yyyy")
+    'MsgBox (Ano)
+    'Mes = Format(Date("d", Date), "mm"))
+    
+     'Caminho Estático onde os códigos gerados pelo AA consumidos pela macro são SALVOS
+    Codigos = ("G:\Meu Drive\Setor_Financeiro\Latam\2021\Template_Bancos\CodigoGerados.csv")
+    
+    'abre a planilha base
+      Workbooks.Open (Codigos)
+    
+    
+    'Obtém o último código gerado
+     'SELECIONA CONTEÚDO VISÍVEL E COPIA
+       Set Sht = Sheets("CodigoGerados")
+    
+      lRow = Sht.Cells(Sht.Rows.Count, 1).End(xlUp).Row
+      Sht.Range("A1:A" & lRow).Offset(0, 0).Copy
+    
+   
+    'Caminho dinâmico Do arquivo De novos clientes Gerado
+      FILE = ("G:\Meu Drive\Setor_Financeiro\Latam\" & Ano & "\" & Mes & "\" & Dia & "\Banco_Iprocessi\cliente.xlsx")
+        
+    'abre a planilha base
+      Workbooks.Open (FILE)
+    'Obtém o último código gerado
+      Range("B2").Select
+      Set sht1 = Sheets("cliente")
+      ActiveSheet.Paste
+      
+    'Obtém a ultima linha
+    n = Range("B1").CurrentRegion.Rows.Count
+    Range("B2").AutoFill Range("B2:B" & n), xlFillCopy
+    Range("C2").AutoFill Range("C2:C" & n), xlFillCopy
+    Range("D2").AutoFill Range("D2:D" & n), xlFillCopy
+    Range("F2").AutoFill Range("F2:F" & n), xlFillCopy
+    Range("G2").AutoFill Range("G2:G" & n), xlFillCopy
+    Range("H2").AutoFill Range("H2:H" & n), xlFillCopy
+    Range("L2").AutoFill Range("L2:L" & n), xlFillCopy
+    Range("N2").AutoFill Range("N2:N" & n), xlFillCopy
+    Range("O2").AutoFill Range("O2:O" & n), xlFillCopy
+    Range("P2").AutoFill Range("P2:P" & n), xlFillCopy
+    Range("Q2").AutoFill Range("Q2:Q" & n), xlFillCopy
+    Range("R2").AutoFill Range("R2:R" & n), xlFillCopy
+      
+      
+    ' Insire Valores de Nome e Documento
+    
+    'Caminho da planilha temp
+    'Caminho estático da Planilha temp auxiliar
+    temp = ("G:\Meu Drive\Setor_Financeiro\Latam\2021\Template_Bancos\temp.xlsx")
+    
+    'abre a planilha temp
+    Workbooks.Open (temp)
+    
+    n = Range("D1").CurrentRegion.Rows.Count
+    'ativa o a planilha #temp
+    Sheets("temp").Activate
+    'Seleciona o range1
+     Range("M1:M" & n).Offset(0, 0).Copy
+     
+    Workbooks.Open (FILE)
+    Set sht1 = Sheets("cliente")
+    'SELECIONA E2
+    sht1.Range("E2").Select
+    'COLA NA CELULA E2
+    ActiveSheet.Paste
+      
+  
+
+End Sub
