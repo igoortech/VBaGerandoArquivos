@@ -1,0 +1,304 @@
+Sub AtualizaBase_Remove_Duplicados()
+    'Quando for obter um conjuto de range usar long
+    Dim CValor As String
+    Dim lRow As Long
+    Dim Ultima As Long
+    Dim Row2 As Long
+    Dim Sht As Worksheet
+    Dim sht2 As Worksheet
+    Dim pathdrive As String
+    Dim ColA As Range
+    Dim cidades As String
+    Dim Munic As String
+    Dim CodMunic As String
+    Dim CodDepartmento As String
+    Dim Departamento As String
+    Dim K As Range
+    Dim Valor As Range
+    Dim Vazio As Range
+    Dim m As Range
+    
+    Dim Dia As String
+    Dim Mes As String
+    Dim Ano As String
+    
+    Dia = Format(Date, "dd")
+    'MsgBox (Dia)
+    Mes = Format(Date, "mm")
+    'MsgBox (Mes)
+    Ano = Format(Date, "yyyy")
+    'MsgBox (Ano)
+    'Mes = Format(Date("d", Date), "mm"))
+
+
+    'Caminho da planilha temp
+    'Caminho estático da planilha auxiliar para a macro
+    temp = ("G:\Meu Drive\Setor_Financeiro\Latam\2021\Template_Bancos\temp.xlsx")
+     'temp = ("G:\Meu Drive\Setor_Financeiro\Latam\2021\05\30\Banco_Iprocessi\ExtratoCash.xlsx")
+    
+    'abre a planilha temp
+    Workbooks.Open (temp)
+    
+    'ativa o a planilha #temp
+     Sheets("temp").Activate
+    'Seleciona o range1
+     ActiveSheet.Range("A1").Select
+    'Cola o conteudo copiado
+     ActiveSheet.Paste
+    
+    'FILTRA OS SEM NOME E REMOVE
+    
+     Set m = Range("M1").CurrentRegion
+     Set Sht = Sheets("temp")
+    'Filtra a Coluna K por #N/D
+    
+    ValorFiltro = "#N/D"
+    'Verifica se existem clientes Sem nome columa M
+    m.AutoFilter Field:=13, Criteria1:=ValorFiltro, Operator:=xlAnd
+    
+     'vai para ultima celula com contéudo desconsiderando o header
+    If ActiveSheet.Cells(Rows.Count, 1).End(xlUp).Row > 1 Then
+            Application.DisplayAlerts = False
+            'SELECIONA CONTEÚDO VISÍVEL E COPIA
+             'MsgBox "Records"
+            lRow = Sht.Cells(Sht.Rows.Count, 1).End(xlUp).Row
+            Sht.Range("A1:N" & lRow).Offset(1).Delete
+            'Desativa a pergunta de exclusão
+            Application.DisplayAlerts = True
+            'Destiva o filtro de exclusão
+           ActiveSheet.AutoFilterMode = False
+    Else
+        'MsgBox "Não existem Registros Sem nomes para excluir"
+        'desativa o filtro
+         ActiveSheet.AutoFilterMode = False
+    End If
+    
+        
+    'REMOVE LINHAS DUPLICADAS
+    '###########################################
+    'CONTA QUANTAS LINHAS  A TABELA #TEMP POSSUE
+    lRow = Sht.Cells(Sht.Rows.Count, 1).End(xlUp).Row
+    'SELECIONA OS VALORES PARA REMOVER OS DUPLICADOS
+    Range("A1:N" & Range("B1").End(xlDown).Row).Select
+    'REMOVE OS VALORES DUPLICADOS
+    Selection.RemoveDuplicates Columns:=Array(9), Header:=xlNo
+    'OBTÉM A QUANTIDADE DE LINHAS PARA O LOOP
+    CValor = Range("U1").Value
+    'ATIVA A PLANILHA TEMP
+    Set Sht = Sheets("temp")
+    'OBTÉMA  ULTIMA LINHA CONSIDERANDO REMOVIDO SO DUPLICADOS
+     lRow = Sht.Cells(Sht.Rows.Count, 1).End(xlUp).Row
+     'COPIA O INTERVALO DE I ATÉ A ULTIMA LINHA PARA INSERIR NA BASE
+     Sht.Range("I1:I" & lRow).Offset(0, 0).Select
+     Selection.Copy
+     
+    
+    'Caminho estático da planilha Base de Registro de clientes
+    Base = ("G:\Meu Drive\Setor_Financeiro\Latam\BASE.xlsx")
+    '###############################################################
+    'Caminho dinâmico que contém o arquivo cliente gerado do dia
+    cli = ("G:\Meu Drive\Setor_Financeiro\Latam\" & Ano & "\" & Mes & "\" & Dia & "\Banco_Iprocessi\cliente.xlsx")
+    'abre a planilha base
+    Workbooks.Open (Base)
+    
+    Set sht2 = Sheets("Hoja1")
+    'ativa o BASE
+    Sheets("Hoja1").Activate
+    
+    'COPIA O DOCUMENTO
+   'Vai para ultima celula vazia.
+    Range("A" & Rows.Count).End(xlUp).Offset(1).Select
+    Set ColA = ActiveCell
+    'seleciona o intervaldo A1
+    'MsgBox ColA.Address
+    'Range("A1").Select
+    'cola o conteudo copiado a partir do intervalado a1
+    ActiveSheet.Paste
+    
+    '----------------INSERE DOCUMENTO O ARQUIVO CLIENTES CSV-----"
+     'abre a planilha clientes base
+     
+    Workbooks.Open (cli)
+     'Sheets ("cliente")
+    'SELECIONA N2
+     Range("N2").Select
+    'COLA NA CELULA N2
+    ActiveSheet.Paste
+
+   '---------------------------------------------------
+    
+    '-----COPIA O NOME  PARA BASE
+    'Sheets("temp").Activate
+    'Set sht = Sheets("temp")
+    'abre a planilha BASE
+    Windows("BASE.xlsx").Activate
+    'Sheets ("Hoja1")
+    
+    
+    lRow = Sht.Cells(Sht.Rows.Count, 1).End(xlUp).Row
+    Sht.Range("M1:M" & lRow).Offset(0, 0).Copy
+    
+     'pega a planilha ativa atual
+   ' Workbooks(Active).Activate
+   'Vai para ultima celula vazia.
+    Range("F" & Rows.Count).End(xlUp).Offset(1).Select
+    'seleciona o intervaldo A1
+    'Range("A1").Select
+    'cola o conteudo copiado a partir do intervalado a1
+    ActiveSheet.Paste
+    
+    '----------------INSERE NOME O ARQUIVO CLIENTES CSV-----"
+     'abre a planilha clientes base
+     
+     Windows("cliente.xlsx").Activate
+    'SELECIONA N2
+     Range("E2").Select
+    'COLA NA CELULA N2
+    ActiveSheet.Paste
+
+    'abre a planilha BASE
+    Windows("BASE.xlsx").Activate
+    'Sheets ("Hoja1")
+    'Caminho da formula dinâmica
+    pathdrive = ("G:\Meu Drive\Setor_Financeiro\Latam\" & Ano & "\" & Mes & "\Banco_Iprocessi\")
+    'Formula montada
+    cidades = "=PROCV(" & ColA.Address(0, 0) & ";'" & pathdrive & "[CONCILIATION_Banco_Iprocessi.xlsm]Extracto Cash L'!$M:$V;10;0)"
+    'Inserir a formula
+    'MsgBox ColA.Address
+    Range("K" & Rows.Count).End(xlUp).Offset(1).Select
+    Set K = ActiveCell
+    ActiveCell.FormulaLocal = cidades
+    'Obtém a ultima coluna A com conteudo
+    'Ultima = Range("A" & Rows.Count).End(xlUp).Row
+     'conta quantas linhas a tabela possue
+     Ultima = Range("A1").CurrentRegion.Rows.Count
+    'preenche ela até a ultima linha
+    ActiveCell.AutoFill Destination:=Range(ActiveCell.Address & ":K" & Ultima), Type:=xlFillCopy
+    'Seleciona da celula ativa até ultima celula com conteudo e copia
+    Range(ActiveCell, ActiveCell.End(xlDown)).Copy
+    
+    '====SUBSTITUI AS FORMULAS POR VALORES REAIS
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    
+    'COPIA OS VALORES REAIS PARA CLIENTES
+    Range(ActiveCell, ActiveCell.End(xlDown)).Copy
+    '----------------INSERE CIDADES O ARQUIVO CLIENTES CSV-----"
+     'abre a planilha clientes base
+     
+    Windows("cliente.xlsx").Activate
+    'SELECIONA N2
+     Range("K2").Select
+    'COLA NA CELULA N2
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    
+
+    'COLUNA J
+    'Caminho da formula dinâmica
+    Windows("BASE.xlsx").Activate
+    'Sheets ("Hoja1")
+    CodMunic = "=PROCV(" & K.Address(0, 0) & ";aux!A:D;3;0)"
+    'Inserir a formula
+    'MsgBox ColA.Address
+    Range("J" & Rows.Count).End(xlUp).Offset(1).Select
+    ActiveCell.FormulaLocal = CodMunic
+    'Obtém a ultima coluna A com conteudo
+    Ultima = Range("A" & Rows.Count).End(xlUp).Row
+    'preenche ela até a ultima linha
+    ActiveCell.AutoFill Destination:=Range(ActiveCell.Address & ":J" & Ultima), Type:=xlFillCopy
+    
+    'Seleciona da celula ativa até ultima celula com conteudo e copia
+    Range(ActiveCell, ActiveCell.End(xlDown)).Copy
+    
+    '====SUBSTITUI AS FORMULAS POR VALORES REAIS
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    
+    'COPIA OS VALORES REAIS PARA CLIENTES
+    Range(ActiveCell, ActiveCell.End(xlDown)).Copy
+
+    
+    '----------------INSERE CODIGO MUNICIPIO O ARQUIVO CLIENTES CSV-----"
+     'abre a planilha clientes base
+     
+     Windows("cliente.xlsx").Activate
+    'SELECIONA N2
+     Range("J2").Select
+    'COLA NA CELULA N2
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    
+    'COLUNA I
+    'Caminho da formula dinâmica
+     Windows("BASE.xlsx").Activate
+    'Sheets ("Hoja1")
+    CodDepartmento = "=PROCV(" & K.Address(0, 0) & ";aux!A:D;2;0)"
+    Range("I" & Rows.Count).End(xlUp).Offset(1).Select
+    ActiveCell.FormulaLocal = CodDepartmento
+    'Obtém a ultima coluna A com conteudo
+    Ultima = Range("A" & Rows.Count).End(xlUp).Row
+    'preenche ela até a ultima linha
+    ActiveCell.AutoFill Destination:=Range(ActiveCell.Address & ":I" & Ultima), Type:=xlFillCopy
+    
+    'Seleciona da celula ativa até ultima celula com conteudo e copia
+    Range(ActiveCell, ActiveCell.End(xlDown)).Copy
+    
+    '====SUBSTITUI AS FORMULAS POR VALORES REAIS
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    
+    'COPIA OS VALORES REAIS PARA CLIENTES
+    Range(ActiveCell, ActiveCell.End(xlDown)).Copy
+
+    
+    '----------------INSERE CODIGO DEPARTAMENTO O ARQUIVO CLIENTES CSV-----"
+     'abre a planilha clientes base
+     
+    Windows("cliente.xlsx").Activate
+    'SELECIONA N2
+    Range("I2").Select
+    'COLA NA CELULA N2
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    
+    
+    
+      'COLUNA H
+    'Caminho da formula dinâmica
+    Windows("BASE.xlsx").Activate
+   'Sheets ("Hoja1")
+    Departamento = "=PROCV(" & K.Address(0, 0) & ";aux!A:D;4;0)"
+    Range("H" & Rows.Count).End(xlUp).Offset(1).Select
+    ActiveCell.FormulaLocal = Departamento
+    'Obtém a ultima coluna A com conteudo
+    Ultima = Range("A" & Rows.Count).End(xlUp).Row
+    'preenche ela até a ultima linha
+    ActiveCell.AutoFill Destination:=Range(ActiveCell.Address & ":H" & Ultima), Type:=xlFillCopy
+    'Set Rng = ActiveCell
+    'Range(Rng.Adress(0, 0) & ":K" & Rng.Adress(0, 0).End(xlDown).Row).Select
+        'Seleciona da celula ativa até ultima celula com conteudo e copia
+    Range(ActiveCell, ActiveCell.End(xlDown)).Copy
+    
+    '====SUBSTITUI AS FORMULAS POR VALORES REAIS
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+
+     
+    'COLUNA E  TIEDA EXPANDIR
+    Range("E" & Rows.Count).End(xlUp).Select
+    'preenche ela até a ultima linha
+    ActiveCell.AutoFill Destination:=Range(ActiveCell.Address & ":E" & Ultima), Type:=xlFillCopy
+        
+   'GERA O OS CÓDIGOS DE CLIENTES
+    Range("B5292").Value = CValor
+    
+    Range("B" & Rows.Count).End(xlUp).Copy
+    
+    
+    
+    
+
+  
+    
+End Sub
