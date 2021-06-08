@@ -1,0 +1,306 @@
+Sub INSERE_CODIGOS_CLIENTES_E_Base()
+    Dim lRow As Long
+    Dim sh As Worksheet
+    Dim Form As Range
+    Dim sh1 As Worksheet
+    Dim RangeCol As Range
+    Dim CValor As Variant
+    Dim m As Range
+    Dim MF As Range
+    Dim L As Range
+    Dim Ultima As Long
+    Dim ValorI As Range
+    Dim CL As Range
+    Dim K As Range
+    
+    Dim Dia As String
+    Dim Mes As String
+    Dim Ano As String
+    
+    Dia = Format(Date, "dd")
+    'MsgBox (Dia)
+    Mes = Format(Date, "mm")
+    'MsgBox (Mes)
+    Ano = Format(Date, "yyyy")
+    'MsgBox (Ano)
+    'Mes = Format(Date("d", Date), "mm"))
+   '---------- Insere número clientes na BASE --------------'
+
+    'CAMINHO estático Gerado pela AA de código  de cadastro de Clientes novos
+    Codigos = ("G:\Meu Drive\Setor_Financeiro\Latam\2021\Template_Bancos\CodigoGerados.csv")
+    
+    'abre a planilha base
+      Workbooks.Open (Codigos)
+    
+    
+    'Obtém o último código gerado
+     'SELECIONA CONTEÚDO VISÍVEL E COPIA
+       Set Sht = Sheets("CodigoGerados")
+    
+      lRow = Sht.Cells(Sht.Rows.Count, 1).End(xlUp).Row
+      Sht.Range("A1:A" & lRow).Offset(0, 0).Copy
+    
+   
+     'Caminho estático da planilha base de clientes
+      Base = ("G:\Meu Drive\Setor_Financeiro\Latam\BASE.xlsx")
+    
+    'abre a planilha base
+      Workbooks.Open (Base)
+    
+    'Obtém o último código gerado
+      Range("D" & Rows.Count).End(xlUp).Offset(1).Select
+      ActiveSheet.Paste
+     'fecha planilha
+      ActiveWorkbook.Close SaveChanges:=True
+    '---------------------------------------------------------'
+                'INSERE VALORES E EXPANDE CLIENTES
+     
+      Windows("cliente.xlsx").Activate
+
+    'Obtém o último código gerado
+      Range("B2").Select
+      ActiveSheet.Paste
+      
+    'Obtém a ultima linha
+    n = Range("D1").CurrentRegion.Rows.Count
+    Range("C2").AutoFill Range("C2:C" & n), xlFillCopy
+    Range("D2").AutoFill Range("D2:D" & n), xlFillCopy
+    Range("F2").AutoFill Range("F2:F" & n), xlFillCopy
+    Range("G2").AutoFill Range("G2:G" & n), xlFillCopy
+    Range("H2").AutoFill Range("H2:H" & n), xlFillCopy
+    Range("L2").AutoFill Range("L2:L" & n), xlFillCopy
+    Range("O2").AutoFill Range("O2:O" & n), xlFillCopy
+    Range("P2").AutoFill Range("P2:P" & n), xlFillCopy
+    Range("Q2").AutoFill Range("Q2:Q" & n), xlFillCopy
+    Range("R2").AutoFill Range("R2:R" & n), xlFillCopy
+  ' A = 1
+    'fecha planilha
+    'ActiveWorkbook.Close SaveChanges:=True
+  
+  'a = 1
+    '---------- Atualiza Extrato vindo da Base--------------'
+    'COPIA VALOR_TX DA PLANILHA CASH LOGISTIC
+    'Tornar este caminho da macro dinâmico
+    'abre a extrato
+    'Caminho dinâmico  Extrato gerado com dados da concilicao
+   Workbooks.Open ("G:\Meu Drive\Setor_Financeiro\Latam\" & Ano & "\" & Mes & "\" & Dia & "\Banco_Iprocessi\ExtratoCash.xlsx")
+    
+    'abre a sessao cashlogic
+     Set sh1 = Sheets("CashLogic")
+      
+    'Desativa o filtro do extrato cash logistic
+    If Planilha1.AutoFilterMode = False Then
+        
+        ActiveSheet.AutoFilterMode = False
+    End If
+    
+    Ultima = Range("A1").CurrentRegion.Rows.Count
+    
+    '-------------------------------------------------------------
+    '           COLUNA NOMES
+    Set MF = Range("M1").CurrentRegion '-- obtém uma range estática
+    Set m = sh1.UsedRange.Offset(1, 0) '-- obtém uma range dinâmica
+ 
+    
+    'Filtra a Coluna M por #N/D
+    ValorFiltro = "#N/D"
+    MF.AutoFilter Field:=13, Criteria1:=ValorFiltro, Operator:=xlAnd
+      
+    'vai para ultima celula com contéudo desconsiderando o header
+    If ActiveSheet.Cells(Rows.Count, 1).End(xlUp).Row > 1 Then
+           'MsgBox "Existem valores N#D"
+          'Set M = M.Resize(M.Rows.Count - 1)
+          'Limpa conteúdo da coluna para inserir nova formula
+          m.Range("M1:M" & Ultima).Offset(1).ClearContents
+          'Vai para ultíma celula com conteúdo
+         
+         '-INSERE FORMULA NA COLUNA  M PARA TRAZER NOMES DO ARQUIVO BASE
+        'OBTEM O VALOR DA CELULA I PARA FORMULA
+        With Worksheets("CashLogic").AutoFilter.Range
+            Range("I" & .Offset(1, 0).SpecialCells(xlCellTypeVisible)(1).Row).Select
+            Set ValorI = ActiveCell
+        End With
+        
+        '--FORMULA RECEBE O VALOR DE I
+        NomeBase = "=MAIÚSCULA(PROCV(" & ValorI.Address(0, 0) & ";[BASE.xlsx]Hoja1!$A:$G;6;0))"
+        'MsgBox (ValorI.Address)
+        'VAI PARA COLUNA M
+        With Worksheets("CashLogic").AutoFilter.Range
+            Range("M" & .Offset(1, 0).SpecialCells(xlCellTypeVisible)(1).Row).Select
+        End With
+        ActiveCell.FormulaLocal = NomeBase
+        'Obtém a ultima coluna A com conteudo
+        'Ultima = Range("A" & Rows.Count).End(xlUp).Row
+         'conta quantas linhas a tabela possue
+         Ultima = Range("A1").CurrentRegion.Rows.Count
+        'preenche ela até a ultima linha
+        ActiveCell.AutoFill Destination:=Range(ActiveCell.Address & ":M" & Ultima), Type:=xlFillCopy
+          'Desativa o filtro do extrato cash logistic
+        
+        If Planilha1.AutoFilterMode = False Then
+        
+             ActiveSheet.AutoFilterMode = False
+         
+        End If
+       
+    Else
+    
+      'MsgBox "Não existe nenhum valor compatível com este Filtro"
+      'desativa o filtro
+       ActiveSheet.AutoFilterMode = False
+        '  A = 1
+    End If
+'-----------------------------------------------------------------------
+    'COLUNA TIEDA
+    
+    Set MF = Range("L1").CurrentRegion '-- obtém uma range estática
+    Set m = sh1.UsedRange.Offset(1, 0) '-- obtém uma range dinâmica
+    
+    
+    'Filtra a Coluna L por #N/D
+    ValorFiltro = "#N/D"
+    MF.AutoFilter Field:=12, Criteria1:=ValorFiltro, Operator:=xlAnd
+      
+    'vai para ultima celula com contéudo desconsiderando o header
+    If ActiveSheet.Cells(Rows.Count, 1).End(xlUp).Row > 1 Then
+           'MsgBox "Existem valores N#D"
+          'Limpa conteúdo da coluna para inserir nova formula
+          m.Range("L1:L" & Ultima).Offset(1).ClearContents
+          'Vai para ultíma celula com conteúdo
+         
+         '-INSERE FORMULA NA COLUNA  M PARA TRAZER NOMES DO ARQUIVO BASE
+        'OBTEM O VALOR DA CELULA I PARA FORMULA
+        With Worksheets("CashLogic").AutoFilter.Range
+            Range("I" & .Offset(1, 0).SpecialCells(xlCellTypeVisible)(1).Row).Select
+            Set ValorI = ActiveCell
+        End With
+        
+        '--FORMULA RECEBE O VALOR DE I
+        Tieda = "=MAIÚSCULA(PROCV(" & ValorI.Address(0, 0) & ";[BASE.xlsx]Hoja1!$A:$G;5;0))"
+        'MsgBox (ValorI.Address)
+        'VAI PARA COLUNA M
+        With Worksheets("CashLogic").AutoFilter.Range
+            Range("L" & .Offset(1, 0).SpecialCells(xlCellTypeVisible)(1).Row).Select
+        End With
+        ActiveCell.FormulaLocal = Tieda
+        'Obtém a ultima coluna A com conteudo
+        'Ultima = Range("A" & Rows.Count).End(xlUp).Row
+         'conta quantas linhas a tabela possue
+         Ultima = Range("A1").CurrentRegion.Rows.Count
+        'preenche ela até a ultima linha
+        ActiveCell.AutoFill Destination:=Range(ActiveCell.Address & ":L" & Ultima), Type:=xlFillCopy
+          'Desativa o filtro do extrato cash logistic
+        
+        If Planilha1.AutoFilterMode = False Then
+        
+            ActiveSheet.AutoFilterMode = False
+         
+        End If
+        
+    Else
+    
+      'MsgBox "Não existe nenhum valor compatível com este Filtro"
+      'desativa o filtro
+       ActiveSheet.AutoFilterMode = False
+    End If
+    
+    
+    '-----------------------------------------------------------------------
+    'COLUNA CODIGO K
+    
+    Set MF = Range("K1").CurrentRegion '-- obtém uma range estática
+    Set m = sh1.UsedRange.Offset(1, 0) '-- obtém uma range dinâmica
+ 
+    
+    'Filtra a Coluna L por #N/D
+    ValorFiltro = "#N/D"
+    MF.AutoFilter Field:=11, Criteria1:=ValorFiltro, Operator:=xlAnd
+      
+    'vai para ultima celula com contéudo desconsiderando o header
+    If ActiveSheet.Cells(Rows.Count, 1).End(xlUp).Row > 1 Then
+           'MsgBox "Existem valores N#D"
+          'Limpa conteúdo da coluna para inserir nova formula
+          m.Range("K1:K" & Ultima).Offset(1).ClearContents
+          'Vai para ultíma celula com conteúdo
+         
+         '-INSERE FORMULA NA COLUNA  M PARA TRAZER NOMES DO ARQUIVO BASE
+        'OBTEM O VALOR DA CELULA I PARA FORMULA
+        With Worksheets("CashLogic").AutoFilter.Range
+            Range("I" & .Offset(1, 0).SpecialCells(xlCellTypeVisible)(1).Row).Select
+            Set ValorI = ActiveCell
+        End With
+        
+        '--FORMULA RECEBE O VALOR DE I
+        Codigo = "=MAIÚSCULA(PROCV(" & ValorI.Address(0, 0) & ";[BASE.xlsx]Hoja1!$A:$G;4;0))"
+        'MsgBox (ValorI.Address)
+        'VAI PARA COLUNA M
+        
+          With Worksheets("CashLogic").AutoFilter.Range
+            Range("K" & .Offset(1, 0).SpecialCells(xlCellTypeVisible)(1).Row).Select
+         End With
+        
+        ActiveCell.FormulaLocal = Codigo
+        'Obtém a ultima coluna A com conteudo
+        'Ultima = Range("A" & Rows.Count).End(xlUp).Row
+         'conta quantas linhas a tabela possue
+         Ultima = Range("A1").CurrentRegion.Rows.Count
+        'preenche ela até a ultima linha
+        ActiveCell.AutoFill Destination:=Range(ActiveCell.Address & ":K" & Ultima), Type:=xlFillCopy
+          'Desativa o filtro do extrato cash logistic
+        
+        If Planilha1.AutoFilterMode = False Then
+        
+            ActiveSheet.AutoFilterMode = False
+         
+        End If
+        
+    Else
+      'MsgBox "Não existe nenhum valor compatível com este Filtro"
+      'desativa o filtro
+       ActiveSheet.AutoFilterMode = False
+
+    End If
+    
+    '--------------------------------------- FILTRA COLUNA K TODOS #N/D
+    'COLUNA CODIGO K
+    
+    Set MF = Range("K1").CurrentRegion '-- obtém uma range estática
+    Set m = sh1.UsedRange.Offset(1, 0) '-- obtém uma range dinâmica
+ 
+    
+    'Filtra a Coluna L por #N/D
+    ValorFiltro = "#N/D"
+    MF.AutoFilter Field:=11, Criteria1:=ValorFiltro, Operator:=xlAnd
+      
+    'vai para ultima celula com contéudo desconsiderando o header
+    If ActiveSheet.Cells(Rows.Count, 1).End(xlUp).Row > 1 Then
+           'MsgBox "Existem valores N#D"
+          'Limpa conteúdo da coluna para inserir nova formula
+           Application.DisplayAlerts = False
+          m.Range("A1:N" & Ultima).Offset(1).Delete
+          'Vai para ultíma celula com conteúdo
+         
+        If Planilha1.AutoFilterMode = False Then
+            Application.DisplayAlerts = True
+            ActiveSheet.AutoFilterMode = False
+            'fecha planilha
+            ' ActiveWorkbook.Close SaveChanges:=True
+         
+        End If
+        
+    Else
+      'MsgBox "Não existe nenhum valor compatível com este Filtro"
+      'desativa o filtro
+       ActiveSheet.AutoFilterMode = False
+     'fecha planilha
+     ' ActiveWorkbook.Close SaveChanges:=True
+
+    End If
+    
+  '---------------------------------------------------------------------------
+   'SALVA OS ARQUIVOS
+   
+    
+    
+End Sub
+
