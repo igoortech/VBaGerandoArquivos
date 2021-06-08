@@ -1,0 +1,13 @@
+Sub OBTER_ULTIMO_CODIGO()
+    Dim LastR As Range
+    'Caminho estático da planilha base de clientes
+    Base = ("G:\Meu Drive\Setor_Financeiro\Latam\BASE.xlsx")
+    
+    'abre a planilha base
+    Workbooks.Open (Base)
+    
+    'Obtém o último código gerado
+    Range("D" & Rows.Count).End(xlUp).Copy
+
+
+End Sub
