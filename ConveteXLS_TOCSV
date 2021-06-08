@@ -1,0 +1,49 @@
+Sub ConveterXLXS_CSV_EXTRATO()
+   
+'Setando/Criando variáveis
+'#############################################################################
+
+    Dim m As Integer
+    Dim y As Integer
+    Dim wbkExport As Workbook
+    Dim shtToExport As Worksheet
+    Dim shtToExport1 As Worksheet
+    Dim Extrato As Worksheet
+    Dim Dia As String
+    Dim Mes As String
+    Dim Ano As String
+    Dim NomeMes As String
+    
+    Dia = Format(Date, "dd")
+    'MsgBox (Dia)
+    Mes = Format(Date, "mm")
+    'MsgBox (Mes)
+    Ano = Format(Date, "yyyy")
+    'MsgBox (Ano)
+    
+    NomeMes = MonthName(Month(Date))
+    'MsgBox (NomeMes)
+    
+'Abre o arquivo extrato.xlsx para converter
+'#############################################################################
+    'Workbooks.Open ("G:\Meu Drive\Setor_Financeiro\Latam\" & Ano & "\" & Mes & "\" & Dia & "\Banco_Iprocessi\ExtratoCash.xlsx")
+    Windows("ExtratoCash.xlsx").Activate
+    'ativa o extrato que foi Gerado
+
+    
+'Criando arquivo csv com dados da planilha xlsx (a do arquivo macro)
+'#############################################################################
+    
+    Set shtToExport = ActiveSheet    'Sheet to export as CSV
+    Set wbkExport = Application.Workbooks.Add
+    shtToExport.Copy Before:=wbkExport.Worksheets(wbkExport.Worksheets.Count)
+    Application.DisplayAlerts = False                       'Possibly overwrite without asking
+    wbkExport.SaveAs Filename:="G:\Meu Drive\Setor_Financeiro\Latam\" & Ano & "\" & Mes & "\" & Dia & "\Banco_Iprocessi\" & NomeMes & Dia & ".csv", FileFormat:=xlCSV, Local:=True
+    Application.DisplayAlerts = True
+    wbkExport.Close SaveChanges:=False
+    ActiveWorkbook.Close SaveChanges:=False
+
+    Call ConveterXLXS_CSV_CLIENTE
+       
+End Sub
+
