@@ -1,0 +1,170 @@
+Sub GeraArquivoDD()
+    Dim n As Integer
+    Dim K As Range
+    Dim Rng As Range
+    Dim LastRow As Integer
+    Dim lRow As Long
+    Dim sh As Worksheet
+    Dim Dia As String
+    Dim Sht As Worksheet
+    Dim Mes As String
+    Dim Ano As String
+    
+
+    
+    
+    
+    Dia = Format(Date, "dd")
+    'MsgBox (Dia)
+    Mes = Format(Date, "mm")
+    'MsgBox (Mes)
+    Ano = Format(Date, "yyyy")
+    'MsgBox (Ano)
+    'Mes = Format(Date("d", Date), "mm"))
+     
+   '======================================================================
+   '======================================================================
+    'recebe o caminho do arquivo baixado
+    'Caminho estático
+    'FILE = ("G:\Meu Drive\Setor_Financeiro\Latam\2021\05\Banco_Iprocessi\CONCILIATION_Banco_Iprocessi.xlsm")
+    'Caminho dinâmico
+    FILE = ("G:\Meu Drive\Setor_Financeiro\Latam\" & Ano & "\" & Mes & "\Banco_Iprocessi\CONCILIATION_Banco_Iprocessi.xlsm")
+         
+    'MsgBox (FILE)
+    
+    
+    'abre o conciliacao
+    Workbooks.Open (FILE)
+   
+    'ativa a aba extrato cash L
+    Sheets("Extracto Cash L").Activate
+    
+ 
+
+    'pega a range a6 e toda regiao atual
+    
+    Set Rng = Range("A6")
+    Set Sht = Sheets("Extracto Cash L")
+    
+    'obtem data de ontem
+     ontem = Format(DateAdd("d", -1, Date), "dd/mm/yyyy")
+     'ontem = "26/05/2021"
+    'MsgBox (ontem)
+    'insere no filtro campo a6 o valor ontem
+    Set RangeCol = ActiveSheet.Range("A6:A" & Range("A6").End(xlDown).Rows.Count + 1)
+    RangeCol.AutoFilter Field:=1, Criteria1:=ontem, Operator:=xlAnd
+    
+    'vai para ultima celula com contéudo desconsiderando o header
+      If ActiveSheet.Cells(Rows.Count, 1).End(xlUp).Row > 1 Then
+      
+             'MsgBox "Records"
+            'SELECIONA CONTEÚDO VISÍVEL E COPIA
+            lRow = Sht.Cells(Sht.Rows.Count, 9).End(xlUp).Row
+            Sht.Range("I6:I" & lRow).Offset(1).Copy
+      Else
+      
+        'MsgBox "Não existe nenhuma data compatível com este Filtro"
+        'desativa o filtro
+         ActiveSheet.AutoFilterMode = False
+        'fecha planilha sem salvar
+         ActiveWorkbook.Close SaveChanges:=False
+        'encerrar a macro
+        Exit Sub
+        
+    End If
+            
+    
+    'COPIA VALOR_TX DA PLANILHA CASH LOGISTIC
+    'Tornar este caminho da macro dinâmico
+    Workbooks.Open ("G:\Meu Drive\Setor_Financeiro\Latam\" & Ano & "\" & Mes & "\" & Dia & "\Banco_Iprocessi\ExtratoCash.xlsx")
+    
+    'ativa o extrato que foi baixado
+    'Workbooks("ExtratoCash.xlsx").Activate
+    Sheets("CashLogic").Activate
+    ActiveSheet.Range("D2").Select
+    ActiveSheet.Paste
+    
+    DataFormatada = Format(DateAdd("d", -1, Date), "yyyymmdd")
+    'MsgBox (DataFormatada)
+    'INSERE VALOR DE DATA NA A2
+    Range("A2").Select
+    Selection.Value = DataFormatada
+    
+  
+    
+    lRow = Sht.Cells(Sht.Rows.Count, 13).End(xlUp).Row
+    Sht.Range("M6:M" & lRow).Offset(1).Copy
+     
+     
+    ActiveSheet.Range("I2").Select
+    ActiveSheet.Paste
+    
+    'FORMULA PARA BUSCAR NOMES DA PLANILHA FLEET DINÂMICA DE ACORDO COM MÊS VIGENTE
+    Nomes = "=MAIÚSCULA(PROCV(I2;'G:\Meu Drive\Setor_Financeiro\Latam\" & Ano & "\" & Mes & "\Banco_Iprocessi\[CONCILIATION_Banco_Iprocessi.xlsm]FLEET'!$C:$D;2;0))"
+    ActiveSheet.Range("M2").Select
+    ActiveCell.FormulaLocal = Nomes
+    
+    
+    'ActiveWorkbook.Save
+    
+     
+    'Expande campos
+    'conta quantas linhas a tabela possue
+    n = Range("D2").CurrentRegion.Rows.Count
+    Range("A2").AutoFill Range("A2:A" & n), xlFillCopy
+    Range("B2").AutoFill Range("B2:B" & n), xlFillCopy
+    Range("C2").AutoFill Range("C2:C" & n), xlFillCopy
+    Range("E2").AutoFill Range("E2:E" & n), xlFillCopy
+    Range("F2").AutoFill Range("F2:F" & n), xlFillCopy
+    Range("G2").AutoFill Range("G2:G" & n), xlFillCopy
+    Range("H2").AutoFill Range("H2:H" & n), xlFillCopy
+    Range("J2").AutoFill Range("J2:J" & n), xlFillCopy
+    Range("K2").AutoFill Range("K2:K" & n), xlFillCopy
+    Range("L2").AutoFill Range("L2:L" & n), xlFillCopy
+    Range("M2").AutoFill Range("M2:M" & n), xlFillCopy
+    Range("N2").AutoFill Range("N2:N" & n), xlFillCopy
+  
+    
+    
+    Set K = Range("K1").CurrentRegion
+    Set Sht = Sheets("CashLogic")
+    
+    'Filtra a Coluna K por #N/D
+    ValorFiltro = "#N/D"
+    'MsgBox (ontem)
+    'insere no filtro campo a6 o valor ontem
+    'Set RangeCol = ActiveSheet.Range("A6:A" & Range("A6").End(xlDown).Rows.Count + 1)
+    K.AutoFilter Field:=11, Criteria1:=ValorFiltro, Operator:=xlAnd
+    
+     'vai para ultima celula com contéudo desconsiderando o header
+      If ActiveSheet.Cells(Rows.Count, 1).End(xlUp).Row > 1 Then
+      
+            'SELECIONA CONTEÚDO VISÍVEL E COPIA
+             'MsgBox "Records"
+            lRow = Sht.Cells(Sht.Rows.Count, 1).End(xlUp).Row
+            Sht.Range("A1:N" & lRow).Offset(1).Copy
+      Else
+        'MsgBox "Não existem novos clientes a serem cadastrados"
+        'desativa o filtro
+         ActiveSheet.AutoFilterMode = False
+        'fecha planilha sem salvar
+         ActiveWorkbook.Close SaveChanges:=False
+        'encerrar a macro
+        Exit Sub
+        
+    End If
+           
+    
+       
+   
+
+    Call AtualizaBase_Remove_Duplicados
+    
+    
+  
+  
+   
+      
+
+    
+End Sub
